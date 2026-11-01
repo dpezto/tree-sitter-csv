@@ -1,6 +1,26 @@
-Cargo.lock
-node_modules
-build
-package-lock.json
+/Cargo.lock
+/package-lock.json
+node_modules/
+/build/
 /target/
-.build/
+/.build/
+/.swiftpm/
+/dist/
+/graphify-out/
+
+# Native build products
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.wasm
+/tree-sitter-csv.pc
+/CMakeCache.txt
+/CMakeFiles/
+/cmake_install.cmake
+
+# Python build products
+__pycache__/
+*.py[cod]
+*.egg-info/

@@ -9,18 +9,21 @@ let package = Package(
         .target(
             name: "TreeSitterCSV",
             path: ".",
-            exclude: [
-            ],
             sources: [
                 "csv/src/parser.c",
+                "csv/src/scanner.c",
+                "psv/src/parser.c",
+                "psv/src/scanner.c",
                 "tsv/src/parser.c",
+                "tsv/src/scanner.c",
             ],
-            resources: [
-                .copy("csv/queries")
-                .copy("tsv/queries"),
-            ],
-            publicHeadersPath: "bindings/swift",
+            publicHeadersPath: "bindings/swift/TreeSitterCSV",
             cSettings: [.headerSearchPath("csv/src")]
+        ),
+        .testTarget(
+            name: "TreeSitterCSVTests",
+            dependencies: ["TreeSitterCSV"],
+            path: "bindings/swift/TreeSitterCSVTests"
         ),
     ]
 )
