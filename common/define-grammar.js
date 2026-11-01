@@ -20,28 +20,52 @@
  *
  */
 module.exports = function defineGrammar(dialect, separator) {
+  const decimal_digits = /\d(_?\d)*/;
+  const sign = optional(choice('-', '+'));
+  const signed_integer = seq(sign, decimal_digits);
+  const exponent_part = seq(/[eE]/, signed_integer);
+  const time = seq(
+    /\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?/,
+    optional(seq(/ */, /[APap][Mm]/)),
+    optional(choice(/[Zz]/, /[+-]\d{2}:?\d{2}/)),
+  );
+
   return grammar({
     name: dialect,
+    extras: _ => [],
+    // The internal lexer prefers EOF over an empty text token after a separator.
+    externals: $ => [$._empty_field],
 
     rules: {
       document: $ => seq(
-        repeat(seq($.row, /\r|\r\n|\n/)),
+        repeat(seq($.row, /\r\n|\r|\n/)),
         optional($.row),
       ),
 
-      row: $ => choice(
-        seq(repeat(separator), $.field, repeat(seq(repeat(separator), $.field)), repeat(separator)),
-        repeat1(separator),
-      ),
-      field: $ => choice($.text, $.number, $.float, $.boolean),
+      row: $ => seq($.field, repeat(seq(separator, $.field))),
+      field: $ => choice($.text, $.number, $.float, $.boolean, $.date, alias($._empty_field, $.text)),
+
+      number: _ => token(choice(signed_integer, /0[xX][\da-fA-F](_?[\da-fA-F])*/)),
+      float: _ => token(choice(
+        seq(signed_integer, exponent_part),
+        seq(sign, '.', decimal_digits, optional(exponent_part)),
+        seq(signed_integer, '.', optional(decimal_digits), optional(exponent_part)),
+      )),
+      boolean: _ => choice('true', 'false'),
+
+      // Recognize date shapes; calendar and timezone validation belongs to consumers.
+      date: _ => token(choice(
+        seq(
+          choice(/\d{1,2}[-./]\d{1,2}[-./]\d{2,4}/, /\d{2,4}[-./]\d{1,2}[-./]\d{1,2}/),
+          optional(seq(choice(/[Tt]/, / +/), time)),
+        ),
+        seq(optional('T'), time),
+      )),
 
       text: _ => token(choice(
-        new RegExp(`[^${separator}\\d\\s"][^${separator} \\n\\r"]+`),
+        new RegExp(`[^${separator}\\r\\n"]*`),
         seq('"', repeat(choice(/[^"]/, '""')), '"'),
       )),
-      number: _ => choice(/\d+/, /0[xX][0-9a-fA-F]+/),
-      float: _ => choice(/\d*\.\d+/, /\d+\.\d*/),
-      boolean: _ => choice('true', 'false'),
     },
   });
 };

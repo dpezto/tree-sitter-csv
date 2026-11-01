@@ -13,12 +13,16 @@ fn main() {
 
     for path in &[
         csv_dir.join("parser.c"),
+        csv_dir.join("scanner.c"),
         psv_dir.join("parser.c"),
+        psv_dir.join("scanner.c"),
         tsv_dir.join("parser.c"),
+        tsv_dir.join("scanner.c"),
     ] {
         c_config.file(path);
         println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
     }
 
     c_config.compile("parser");
+    println!("cargo:rerun-if-changed=common/empty-field-scanner.h");
 }

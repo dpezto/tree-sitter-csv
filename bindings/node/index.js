@@ -15,6 +15,7 @@ try {
 }
 
 try {
+  module.exports.psv.nodeTypeInfo = require('../../psv/src/node-types.json');
   module.exports.csv.nodeTypeInfo = require('../../csv/src/node-types.json');
   module.exports.tsv.nodeTypeInfo = require('../../tsv/src/node-types.json');
 } catch (_) {}

@@ -1,0 +1,330 @@
+================================
+Signed and hexadecimal integers
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+0
+-12
++12
+1_000
+0xFF
+0XCA_FE
+--------------------------------
+(document
+  (row (field (number)))
+  (row (field (number)))
+  (row (field (number)))
+  (row (field (number)))
+  (row (field (number)))
+  (row (field (number))))
+
+================================
+Decimal and scientific floats
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+1.0
+-1.5
++.5
+-.5
+1.
++1.
+1e3
+-2E-4
++3.5e+8
+1_000.25_0
+1.2e1_0
+.5e2
+--------------------------------
+(document
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float)))
+  (row (field (float))))
+
+================================
+Boolean fields
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+true
+false
+--------------------------------
+(document
+  (row (field (boolean)))
+  (row (field (boolean))))
+
+================================
+Text must consume the whole field
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+123abc
+true story
+falsehood
+1e
+1__0
+1_
+1e+
+12:34later
+2026-11-01junk
+text with spaces
+ 123
+123 
+--------------------------------
+(document
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text))))
+
+================================
+Numeric dates and times
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+2026-11-01
+01/11/2026
+11.01.26
+2026/1/2
+2026-11-01T12:34:56.123Z
+2026-11-01t12:34:56z
+2026-11-01 12:34:56-06:00
+2026-11-01T12:34+0530
+12:34
+T12:34:56
+1:23 PM
+2026-11-01 1:23 am
+--------------------------------
+(document
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date)))
+  (row (field (date))))
+
+================================
+Calendar validity is left to consumers
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+2025-02-31
+2025-13-01
+--------------------------------
+(document
+  (row (field (date)))
+  (row (field (date))))
+
+================================
+Ambiguous compact dates stay integers
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+20261101
+--------------------------------
+(document
+  (row (field (number))))
+
+================================
+Quoted fields stay text
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+"123"
+"-1.2e3"
+"true"
+"2026-11-01"
+""
+"a""b"
+--------------------------------
+(document
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text))))
+
+================================
+CSV multiple rows and empty columns
+:language(csv)
+================================
+,,
+foo,,bar
+,42,
+,,
+--------------------------------
+(document
+  (row (field (text)) (field (text)) (field (text)))
+  (row (field (text)) (field (text)) (field (text)))
+  (row (field (text)) (field (number)) (field (text)))
+  (row (field (text)) (field (text)) (field (text))))
+
+================================
+CSV adjacent typed fields
+:language(csv)
+================================
+-12,+.5,1e3,false,2026-11-01,123abc
+--------------------------------
+(document
+  (row (field (number)) (field (float)) (field (float)) (field (boolean)) (field (date)) (field (text))))
+
+================================
+CSV quoted separators and newlines
+:language(csv)
+================================
+"foo,bar","multi
+line","say ""hi"""
+--------------------------------
+(document
+  (row (field (text)) (field (text)) (field (text))))
+
+================================
+CSV date cannot swallow the next row
+:language(csv)
+================================
+2026-11-01,12:34 PM
+2026-11-02,12:35 PM
+--------------------------------
+(document
+  (row (field (date)) (field (date)))
+  (row (field (date)) (field (date))))
+
+================================
+PSV multiple rows and empty columns
+:language(psv)
+================================
+||
+foo||bar
+|42|
+||
+--------------------------------
+(document
+  (row (field (text)) (field (text)) (field (text)))
+  (row (field (text)) (field (text)) (field (text)))
+  (row (field (text)) (field (number)) (field (text)))
+  (row (field (text)) (field (text)) (field (text))))
+
+================================
+PSV adjacent typed fields
+:language(psv)
+================================
+-12|+.5|1e3|false|2026-11-01|123abc
+--------------------------------
+(document
+  (row (field (number)) (field (float)) (field (float)) (field (boolean)) (field (date)) (field (text))))
+
+================================
+PSV quoted separators and newlines
+:language(psv)
+================================
+"foo|bar"|"multi
+line"|"say ""hi"""
+--------------------------------
+(document
+  (row (field (text)) (field (text)) (field (text))))
+
+================================
+PSV date cannot swallow the next row
+:language(psv)
+================================
+2026-11-01|12:34 PM
+2026-11-02|12:35 PM
+--------------------------------
+(document
+  (row (field (date)) (field (date)))
+  (row (field (date)) (field (date))))
+
+================================
+TSV multiple rows and empty columns
+:language(tsv)
+================================
+		
+foo		bar
+	42	
+		
+--------------------------------
+(document
+  (row (field (text)) (field (text)) (field (text)))
+  (row (field (text)) (field (text)) (field (text)))
+  (row (field (text)) (field (number)) (field (text)))
+  (row (field (text)) (field (text)) (field (text))))
+
+================================
+TSV adjacent typed fields
+:language(tsv)
+================================
+-12	+.5	1e3	false	2026-11-01	123abc
+--------------------------------
+(document
+  (row (field (number)) (field (float)) (field (float)) (field (boolean)) (field (date)) (field (text))))
+
+================================
+TSV quoted separators and newlines
+:language(tsv)
+================================
+"foo	bar"	"multi
+line"	"say ""hi"""
+--------------------------------
+(document
+  (row (field (text)) (field (text)) (field (text))))
+
+================================
+TSV date cannot swallow the next row
+:language(tsv)
+================================
+2026-11-01	12:34 PM
+2026-11-02	12:35 PM
+--------------------------------
+(document
+  (row (field (date)) (field (date)))
+  (row (field (date)) (field (date))))
+
+================================
+Blank lines are rows
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+
+foo
+
+bar
+
+--------------------------------
+(document
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text)))
+  (row (field (text))))

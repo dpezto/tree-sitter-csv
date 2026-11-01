@@ -2,4 +2,6 @@
 (number) @number
 (float) @float
 (boolean) @boolean
+(date) @type.builtin
+
 "," @punctuation.delimiter

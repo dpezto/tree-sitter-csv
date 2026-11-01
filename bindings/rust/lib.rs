@@ -9,7 +9,7 @@
 //! "John Doe",30,120000
 //! "#;
 //! let mut parser = tree_sitter::Parser::new();
-//! parser.set_language(tree_sitter_csv::language_csv()).expect("Error loading CSV grammar");
+//! parser.set_language(&tree_sitter_csv::language_csv()).expect("Error loading CSV grammar");
 //! let tree = parser.parse(code, None).unwrap();
 //!
 //! let code = r"
@@ -17,7 +17,7 @@
 //! John Doe|30|120000
 //! ";
 //! let mut parser = tree_sitter::Parser::new();
-//! parser.set_language(tree_sitter_csv::language_tsv()).expect("Error loading PSV grammar");
+//! parser.set_language(&tree_sitter_csv::language_tsv()).expect("Error loading PSV grammar");
 //! let tree = parser.parse(code, None).unwrap();
 //!
 //! let code = r"
@@ -25,7 +25,7 @@
 //! John Doe\t30\t120000
 //! ";
 //! let mut parser = tree_sitter::Parser::new();
-//! parser.set_language(tree_sitter_csv::language_tsv()).expect("Error loading TSV grammar");
+//! parser.set_language(&tree_sitter_csv::language_tsv()).expect("Error loading TSV grammar");
 //! let tree = parser.parse(code, None).unwrap();
 //! ```
 //!
@@ -94,19 +94,87 @@ pub const HIGHLIGHT_QUERY_TSV: &str = include_str!("../../tsv/queries/highlights
 mod tests {
     #[test]
     fn test_can_load_grammar() {
-        let mut parser = tree_sitter::Parser::new();
-        parser
-            .set_language(super::language_csv())
-            .expect("Error loading CSV grammar");
+        for (language, highlights) in [
+            (super::language_csv(), super::HIGHLIGHT_QUERY_CSV),
+            (super::language_psv(), super::HIGHLIGHT_QUERY_PSV),
+            (super::language_tsv(), super::HIGHLIGHT_QUERY_TSV),
+        ] {
+            let mut parser = tree_sitter::Parser::new();
+            parser
+                .set_language(&language)
+                .expect("Error loading grammar");
+            tree_sitter::Query::new(&language, highlights).expect("Invalid highlighting query");
+        }
+    }
 
-        let mut parser = tree_sitter::Parser::new();
-        parser
-            .set_language(super::language_psv())
-            .expect("Error loading PSV grammar");
+    #[test]
+    fn test_field_types_and_row_boundaries() {
+        for (language, separator) in [
+            (super::language_csv(), ","),
+            (super::language_psv(), "|"),
+            (super::language_tsv(), "\t"),
+        ] {
+            let mut parser = tree_sitter::Parser::new();
+            parser.set_language(&language).unwrap();
 
-        let mut parser = tree_sitter::Parser::new();
-        parser
-            .set_language(super::language_tsv())
-            .expect("Error loading TSV grammar");
+            for newline in ["\n", "\r\n", "\r"] {
+                let first = [
+                    "text",
+                    "-12",
+                    "+.5",
+                    "1e3",
+                    "true",
+                    "2026-11-01T12:34:56Z",
+                    "",
+                ]
+                .join(separator);
+                let input = format!(
+                    "{first}{newline}{}",
+                    ["next", "", "123abc", ""].join(separator)
+                );
+                let mut tree = parser.parse(&input, None).unwrap();
+                let root = tree.root_node();
+                assert!(!root.has_error(), "{}", root.to_sexp());
+                assert_eq!(root.named_child_count(), 2);
+
+                let first_row = root.named_child(0).unwrap();
+                let expected = [
+                    "text", "number", "float", "float", "boolean", "date", "text",
+                ];
+                assert_eq!(first_row.named_child_count(), expected.len());
+                for (index, kind) in expected.iter().enumerate() {
+                    let field = first_row.named_child(index).unwrap();
+                    assert_eq!(field.named_child(0).unwrap().kind(), *kind);
+                }
+
+                let second_row = root.named_child(1).unwrap();
+                assert_eq!(second_row.named_child_count(), 4);
+                let empty = second_row.named_child(1).unwrap();
+                assert_eq!(empty.start_byte(), empty.end_byte());
+
+                let end = root.end_position();
+                for (suffix, kind) in [("false", "boolean"), ("", "text")] {
+                    let updated = format!("{input}{suffix}");
+                    tree.edit(&tree_sitter::InputEdit {
+                        start_byte: input.len(),
+                        old_end_byte: tree.root_node().end_byte(),
+                        new_end_byte: updated.len(),
+                        start_position: end,
+                        old_end_position: tree.root_node().end_position(),
+                        new_end_position: tree_sitter::Point {
+                            row: end.row,
+                            column: end.column + suffix.len(),
+                        },
+                    });
+                    tree = parser.parse(updated, Some(&tree)).unwrap();
+                    let root = tree.root_node();
+                    assert!(!root.has_error(), "{}", root.to_sexp());
+                    let row = root.named_child(1).unwrap();
+                    assert_eq!(row.named_child_count(), 4);
+                    let last = row.named_child(3).unwrap();
+                    assert_eq!(last.named_child(0).unwrap().kind(), kind);
+                }
+            }
+        }
     }
 }

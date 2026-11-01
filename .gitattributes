@@ -1,10 +1,7 @@
-/src/** linguist-vendored
-/examples/* linguist-vendored
+*/src/grammar.json linguist-generated -diff
+*/src/node-types.json linguist-generated -diff
+*/src/parser.c linguist-generated -diff
+*/src/tree_sitter/** linguist-vendored
 
-src/grammar.json linguist-generated
-src/node-types.json linguist-generated
-src/parser.c linguist-generated
-
-src/grammar.json -diff
-src/node-types.json -diff
-src/parser.c -diff
+# Whitespace is input data in CSV/PSV/TSV fixtures.
+test/corpus/*.txt whitespace=-blank-at-eol
