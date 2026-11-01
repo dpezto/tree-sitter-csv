@@ -8,7 +8,7 @@ way.)
 
 ```toml
 [dependencies]
-tree-sitter = "0.20.10"
+tree-sitter = "0.25.10"
 tree-sitter-csv = "1.2.0"
 ```
 
@@ -20,7 +20,7 @@ let code = r#"
 Hello,World
 "#;
 let mut parser = Parser::new();
-parser.set_language(tree_sitter_csv::language_csv()).expect("Error loading CSV grammar");
+parser.set_language(&tree_sitter_csv::language_csv()).expect("Error loading CSV grammar");
 let parsed = parser.parse(code, None);
 ```
 
