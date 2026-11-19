@@ -2,4 +2,11 @@
 (number) @number
 (float) @float
 (boolean) @boolean
-(date) @type.builtin
+(comment) @comment
+
+((date) @type.builtin
+  (#set! priority 110))
+
+; CsvViewComment uses Neovim's default extmark priority of 4096.
+((comment (date) @type.builtin)
+  (#set! priority 4097))
