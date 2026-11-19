@@ -26,6 +26,21 @@ optional seconds, fractional seconds, AM/PM, and `Z` or numeric UTC offsets
 still be classified as `date`. Calendar validity and ambiguous date order belong
 to the consuming application. Compact dates such as `20261101` remain numbers.
 
+Lines beginning with `#` (optionally preceded by spaces) are comments. They can
+contain separators and quoted text; dates and times inside them are recognized
+and highlighted as `date` nodes. For example:
+
+```csv
+# Exported 2026-11-01T12:34:56Z; next run 02/11/2026
+name,value
+sample,42
+```
+
+Comments end at the next line break. A `#` inside a quoted field, after another
+field, or following non-space text is ordinary data. A leading tab remains a
+field separator in TSV, so it does not indent a comment. To store a first-column
+value beginning with `#`, quote it.
+
 Run `npm install`, `npm run build`, and `npm test` to regenerate and test all three
 grammars. Parsers target ABI 15 and require a Tree-sitter 0.25 or newer runtime.
 
