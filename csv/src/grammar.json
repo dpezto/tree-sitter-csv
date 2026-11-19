@@ -11,8 +11,17 @@
             "type": "SEQ",
             "members": [
               {
-                "type": "SYMBOL",
-                "name": "row"
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "row"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "comment"
+                  }
+                ]
               },
               {
                 "type": "PATTERN",
@@ -25,8 +34,17 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "row"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "row"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "comment"
+                }
+              ]
             },
             {
               "type": "BLANK"
@@ -34,6 +52,54 @@
           ]
         }
       ]
+    },
+    "comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "TOKEN",
+          "content": {
+            "type": "PREC",
+            "value": 1,
+            "content": {
+              "type": "PATTERN",
+              "value": " *#"
+            }
+          }
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "date"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_comment_text"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_comment_text": {
+      "type": "TOKEN",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": "[^0-9\\r\\n]+"
+          },
+          {
+            "type": "PATTERN",
+            "value": "[0-9]"
+          }
+        ]
+      }
     },
     "row": {
       "type": "SEQ",

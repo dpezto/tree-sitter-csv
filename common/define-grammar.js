@@ -38,9 +38,12 @@ module.exports = function defineGrammar(dialect, separator) {
 
     rules: {
       document: $ => seq(
-        repeat(seq($.row, /\r\n|\r|\n/)),
-        optional($.row),
+        repeat(seq(choice($.row, $.comment), /\r\n|\r|\n/)),
+        optional(choice($.row, $.comment)),
       ),
+
+      comment: $ => seq(token(prec(1, / *#/)), repeat(choice($.date, $._comment_text))),
+      _comment_text: _ => token(choice(/[^0-9\r\n]+/, /[0-9]/)),
 
       row: $ => seq($.field, repeat(seq(separator, $.field))),
       field: $ => choice($.text, $.number, $.float, $.boolean, $.date, alias($._empty_field, $.text)),

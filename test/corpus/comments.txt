@@ -1,0 +1,135 @@
+================================
+Empty and ordinary comments
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+#
+# ordinary comment
+   # indented comment
+--------------------------------
+(document (comment) (comment) (comment))
+
+================================
+Dates embedded in prose
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+# Created 2026-11-01; due 02/11/2026.
+# At 12:34 PM and 2026-11-02T01:02:03.456-06:00
+# End 2026-11-03
+--------------------------------
+(document (comment (date) (date)) (comment (date) (date)) (comment (date)))
+
+================================
+Comment numbers remain ordinary text
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+# Build 12345, 1.2e3 and 20261101; no date
+# true false 0xFF
+--------------------------------
+(document (comment) (comment))
+
+================================
+Comment separators do not create fields
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+# date 2026-11-01, next|part	and "quoted" text
+--------------------------------
+(document (comment (date)))
+
+================================
+Hashes within fields are text
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+ABC#123
+text # 2026-11-01
+"# comentario 2026-11-01"
+"multi
+# 2026-11-01
+line"
+--------------------------------
+(document (row (field (text))) (row (field (text))) (row (field (text))) (row (field (text))))
+
+================================
+Date shapes in comments are not calendar validation
+:language(csv)
+:language(psv)
+:language(tsv)
+================================
+# Impossible 2025-02-31 still has a date shape
+--------------------------------
+(document (comment (date)))
+
+================================
+CSV comments between rows
+:language(csv)
+================================
+# Created 2026-11-01
+name,value
+  # Updated 02/11/2026 at 12:34
+sample,42
+# Next 2026-11-03
+--------------------------------
+(document (comment (date)) (row (field (text)) (field (text))) (comment (date) (date)) (row (field (text)) (field (number))) (comment (date)))
+
+================================
+CSV hash in later columns
+:language(csv)
+================================
+foo,# 2026-11-01
+,# id
+"# value",42
+--------------------------------
+(document (row (field (text)) (field (text))) (row (field (text)) (field (text))) (row (field (text)) (field (number))))
+
+================================
+PSV comments between rows
+:language(psv)
+================================
+# Created 2026-11-01
+name|value
+  # Updated 02/11/2026 at 12:34
+sample|42
+# Next 2026-11-03
+--------------------------------
+(document (comment (date)) (row (field (text)) (field (text))) (comment (date) (date)) (row (field (text)) (field (number))) (comment (date)))
+
+================================
+PSV hash in later columns
+:language(psv)
+================================
+foo|# 2026-11-01
+|# id
+"# value"|42
+--------------------------------
+(document (row (field (text)) (field (text))) (row (field (text)) (field (text))) (row (field (text)) (field (number))))
+
+================================
+TSV comments between rows
+:language(tsv)
+================================
+# Created 2026-11-01
+name	value
+  # Updated 02/11/2026 at 12:34
+sample	42
+# Next 2026-11-03
+--------------------------------
+(document (comment (date)) (row (field (text)) (field (text))) (comment (date) (date)) (row (field (text)) (field (number))) (comment (date)))
+
+================================
+TSV hash in later columns
+:language(tsv)
+================================
+foo	# 2026-11-01
+	# id
+"# value"	42
+--------------------------------
+(document (row (field (text)) (field (text))) (row (field (text)) (field (text))) (row (field (text)) (field (number))))
